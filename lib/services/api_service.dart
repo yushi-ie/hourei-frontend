@@ -2,8 +2,25 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config.dart';
 import '../models/discussion.dart';
+import '../models/law.dart';
 
 class ApiService {
+  Future<LawDetail> getLawDetail(String lawId) async {
+    final url = Uri.parse('${Config.baseUrl}/api/laws/$lawId');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final body = utf8.decode(response.bodyBytes);
+        final Map<String, dynamic> data = json.decode(body);
+        return LawDetail.fromJson(data);
+      } else {
+        throw Exception('Failed to load law detail: ${response.statusCode}');
+      }
+    } catch (e) {
+      print("Error fetching law detail: $e");
+      rethrow;
+    }
+  }
   Future<List<Discussion>> getTimeline() async {
     final url = Uri.parse('${Config.baseUrl}/api/timeline');
     try {
