@@ -44,51 +44,60 @@ class _LoginScreenState extends State<LoginScreen> {
         ]),
         const SizedBox(height: 40),
         const SizedBox(
-            width: 300,
-            child: TextField(
-              decoration: InputDecoration(
-                hint: Row(children: [
-                  Icon(
-                    Icons.person_outline,
-                    size: 45,
-                  ),
-                  Text(
-                    'User ID',
-                    style: TextStyle(
-                        fontSize: 20,
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.w300),
-                  )
-                ]),
-                border: OutlineInputBorder(),
-                contentPadding:
-                    EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+          width: 300,
+          child: TextField(
+            decoration: InputDecoration(
+              prefixIcon: Icon(
+                Icons.person_outline,
+                size: 45,
               ),
-            )),
+              hintText: 'User ID',
+              hintStyle: TextStyle(
+                  fontSize: 20,
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w300),
+              border: OutlineInputBorder(),
+            ),
+          ),
+        ),
         const SizedBox(height: 20),
         const SizedBox(
             width: 300,
             child: TextField(
-                decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    hint: Row(children: [
-                      SizedBox(width: 5),
-                      Icon(Icons.lock_outline, size: 45),
-                      Text(
-                        'Password',
-                        style: TextStyle(
-                            fontSize: 20,
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.w300),
-                      ),
-                    ])))),
-        const SizedBox(height: 50),
+              decoration: InputDecoration(
+                prefixIcon: Icon(Icons.lock_outline, size: 45),
+                hintText: 'Password',
+                hintStyle: TextStyle(
+                    fontSize: 20,
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w300),
+                border: OutlineInputBorder(),
+              ),
+            )),
+        const SizedBox(height: 20),
         SizedBox(
           width: 300,
           height: 50,
           child: ElevatedButton(
               onPressed: () {
                 // ログイン処理をここに追加
+              },
+              style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4), // ← ここを調整
+                  ),
+                  backgroundColor: Colors.indigo),
+              child: const Text('ログイン',
+                  style: TextStyle(
+                      fontSize: 15, fontFamily: 'Inter', color: Colors.white))),
+        ),
+        const SizedBox(height: 15),
+        SizedBox(
+          width: 300,
+          height: 50,
+          child: ElevatedButton(
+              onPressed: () {
+                // アカウント作成の処理をここに追加
               },
               style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
