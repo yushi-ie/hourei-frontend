@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-import '../services/api_service.dart';
-import '../models/discussion.dart';
-import 'timeline_screen.dart';
-import 'search_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,38 +8,242 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0;
-  
-  static const List<Widget> _pages = <Widget>[
-    TimelineScreen(),
-    SearchScreen(),
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
+  bool isSelected = false;
+  bool checkIsSelected = false;
+  bool newIsSelected = false;
+  bool myPageIsSelected = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.forum),
-            label: 'タイムライン',
+      backgroundColor: const Color(0xFF1E1E1E),
+      body: Row(children: [
+        SizedBox(
+          width: 251,
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Color(0xFF1E2129),
+              border: Border(
+                right: BorderSide(
+                  width: 1,
+                  color: Color(0xFF2E2E2E),
+                ),
+              ),
+            ),
+            child: Column(
+              children: [
+                const SizedBox(
+                  height: 4,
+                ),
+                Container(
+                    height: 75,
+                    alignment: Alignment.center,
+                    child: Row(children: [
+                      const SizedBox(width: 20),
+                      Image.asset(
+                        'assets/hourei.png',
+                        width: 35,
+                        height: 35,
+                        color: const Color(0xFFFAFAFA),
+                      ),
+                      const Text(
+                        'Loophone',
+                        style: TextStyle(
+                          color: Color(0xFFFAFAFA),
+                          fontSize: 16,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 7,
+                      ),
+                      const Text(
+                        'Radar',
+                        style: TextStyle(
+                          color: Color(0xFFFAFAFA),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ])),
+                const Divider(
+                  color: Color(0xFF2E2E2E),
+                  thickness: 1,
+                  height: 1,
+                  indent: 15,
+                  endIndent: 15,
+                ),
+                const SizedBox(height: 30),
+                SizedBox(
+                  width: 232,
+                  height: 44,
+                  child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          isSelected = true;
+                          checkIsSelected = false;
+                          newIsSelected = false;
+                          myPageIsSelected = false;
+                        });
+                        // 議論画面に遷移する処理
+                      },
+                      style: ElevatedButton.styleFrom(
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          backgroundColor: isSelected
+                              ? const Color(0xFF3E3E3E)
+                              : const Color(0xFF1E2129)),
+                      child: Row(children: [
+                        Image.asset(
+                          'assets/giron.png',
+                        ),
+                        const SizedBox(width: 18),
+                        const Text('最新の議論',
+                            style: TextStyle(fontSize: 15, color: Colors.white))
+                      ])),
+                ),
+                const SizedBox(height: 35),
+                SizedBox(
+                  width: 232,
+                  height: 44,
+                  child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          checkIsSelected = true;
+                          isSelected = false;
+                          newIsSelected = false;
+                          myPageIsSelected = false;
+                        });
+                        // 条文階層の画面に遷移する処理
+                      },
+                      style: ElevatedButton.styleFrom(
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4), // ← ここを調整
+                          ),
+                          backgroundColor: checkIsSelected
+                              ? const Color(0xFF3E3E3E)
+                              : const Color(0xFF1E2129)),
+                      child: Row(children: [
+                        Image.asset(
+                          'assets/kensaku.png',
+                        ),
+                        const SizedBox(width: 18),
+                        const Text('条文階層',
+                            style: TextStyle(fontSize: 15, color: Colors.white))
+                      ])),
+                ),
+                const SizedBox(height: 35),
+                SizedBox(
+                  width: 232,
+                  height: 44,
+                  child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          newIsSelected = true;
+                          checkIsSelected = false;
+                          isSelected = false;
+                          myPageIsSelected = false;
+                        });
+                        // ニュース画面に遷移する処理
+                      },
+                      style: ElevatedButton.styleFrom(
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          backgroundColor: newIsSelected
+                              ? const Color(0xFF3E3E3E)
+                              : const Color(0xFF1E2129)),
+                      child: Row(children: [
+                        Image.asset(
+                          'assets/news.png',
+                        ),
+                        const SizedBox(width: 18),
+                        const Text('ニュース・時事ネタ',
+                            style: TextStyle(fontSize: 15, color: Colors.white))
+                      ])),
+                ),
+                const SizedBox(height: 35),
+                SizedBox(
+                  width: 232,
+                  height: 44,
+                  child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          myPageIsSelected = true;
+                          newIsSelected = false;
+                          checkIsSelected = false;
+                          isSelected = false;
+                        });
+                        // マイページ画面に遷移する処理
+                      },
+                      style: ElevatedButton.styleFrom(
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          backgroundColor: myPageIsSelected
+                              ? const Color(0xFF3E3E3E)
+                              : const Color(0xFF1E2129)),
+                      child: Row(children: [
+                        Image.asset(
+                          'assets/mypage.png',
+                        ),
+                        const SizedBox(width: 18),
+                        const Text('マイページ',
+                            style: TextStyle(fontSize: 15, color: Colors.white))
+                      ])),
+                ),
+                const SizedBox(height: 220),
+                const Divider(
+                  color: Color(0xFF2E2E2E),
+                  thickness: 1,
+                  height: 1,
+                  indent: 15,
+                  endIndent: 15,
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'UserIDXXXXXXX',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ) // 一旦これ
+              ],
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: '法令検索',
+        ),
+        Expanded(
+            child: Scaffold(
+          backgroundColor: const Color(0xFF1E1E1E),
+          appBar: AppBar(
+            backgroundColor: const Color(0xFF181D28),
+            title: const Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text(
+                  'ホーム',
+                )
+              ],
+            ),
+            titleTextStyle:
+                const TextStyle(color: Color(0xFFACACAC), fontSize: 15),
+            bottom: const PreferredSize(
+              preferredSize: Size.fromHeight(1),
+              child: Divider(
+                height: 1,
+                thickness: 1,
+                color: Color(0xFF2E2E2E),
+              ),
+            ),
           ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blue,
-        onTap: _onItemTapped,
-      ),
+        ))
+      ]),
     );
   }
 }
