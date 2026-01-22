@@ -222,7 +222,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Scaffold(
           backgroundColor: const Color(0xFF1E1E1E),
           appBar: AppBar(
-            backgroundColor: const Color(0xFF181D28),
+            backgroundColor: const Color(0xFF1E2129),
             title: const Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
