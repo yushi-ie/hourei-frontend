@@ -8,10 +8,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool isSelected = false;
-  bool checkIsSelected = false;
+  bool homeIsSelected = true;
+  bool timelineIsSelected = false;
   bool newIsSelected = false;
   bool myPageIsSelected = false;
+  bool zyoubunIsSelected = false;
 
   @override
   Widget build(BuildContext context) {
@@ -81,10 +82,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ElevatedButton(
                       onPressed: () {
                         setState(() {
-                          isSelected = true;
-                          checkIsSelected = false;
+                          homeIsSelected = true;
+                          timelineIsSelected = false;
                           newIsSelected = false;
                           myPageIsSelected = false;
+                          zyoubunIsSelected = false;
                         });
                         // 議論画面に遷移する処理
                       },
@@ -93,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          backgroundColor: isSelected
+                          backgroundColor: homeIsSelected
                               ? const Color(0xFF3E3E3E)
                               : const Color(0xFF1E2129)),
                       child: Row(children: [
@@ -101,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           'assets/giron.png',
                         ),
                         const SizedBox(width: 18),
-                        const Text('最新の議論',
+                        const Text('ホーム',
                             style: TextStyle(fontSize: 15, color: Colors.white))
                       ])),
                 ),
@@ -112,24 +114,57 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ElevatedButton(
                       onPressed: () {
                         setState(() {
-                          checkIsSelected = true;
-                          isSelected = false;
+                          timelineIsSelected = true;
+                          homeIsSelected = false;
                           newIsSelected = false;
                           myPageIsSelected = false;
+                          zyoubunIsSelected = false;
                         });
-                        // 条文階層の画面に遷移する処理
+                        // タイムラインの画面に遷移する処理
                       },
                       style: ElevatedButton.styleFrom(
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(4), // ← ここを調整
                           ),
-                          backgroundColor: checkIsSelected
+                          backgroundColor: timelineIsSelected
                               ? const Color(0xFF3E3E3E)
                               : const Color(0xFF1E2129)),
                       child: Row(children: [
                         Image.asset(
                           'assets/kensaku.png',
+                        ),
+                        const SizedBox(width: 18),
+                        const Text('タイムライン',
+                            style: TextStyle(fontSize: 15, color: Colors.white))
+                      ])),
+                ),
+                const SizedBox(height: 35),
+                SizedBox(
+                  width: 232,
+                  height: 44,
+                  child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          zyoubunIsSelected = true;
+                          newIsSelected = false;
+                          timelineIsSelected = false;
+                          homeIsSelected = false;
+                          myPageIsSelected = false;
+                        });
+                        // 条文階層画面に遷移する処理
+                      },
+                      style: ElevatedButton.styleFrom(
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          backgroundColor: zyoubunIsSelected
+                              ? const Color(0xFF3E3E3E)
+                              : const Color(0xFF1E2129)),
+                      child: Row(children: [
+                        Image.asset(
+                          'assets/news.png',
                         ),
                         const SizedBox(width: 18),
                         const Text('条文階層',
@@ -144,9 +179,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       onPressed: () {
                         setState(() {
                           newIsSelected = true;
-                          checkIsSelected = false;
-                          isSelected = false;
+                          timelineIsSelected = false;
+                          homeIsSelected = false;
                           myPageIsSelected = false;
+                          zyoubunIsSelected = false;
                         });
                         // ニュース画面に遷移する処理
                       },
@@ -176,8 +212,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         setState(() {
                           myPageIsSelected = true;
                           newIsSelected = false;
-                          checkIsSelected = false;
-                          isSelected = false;
+                          timelineIsSelected = false;
+                          homeIsSelected = false;
+                          zyoubunIsSelected = false;
                         });
                         // マイページ画面に遷移する処理
                       },
@@ -223,16 +260,17 @@ class _HomeScreenState extends State<HomeScreen> {
           backgroundColor: const Color(0xFF1E1E1E),
           appBar: AppBar(
             backgroundColor: const Color(0xFF1E2129),
-            title: const Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(
-                  'ホーム',
-                )
-              ],
-            ),
-            titleTextStyle:
-                const TextStyle(color: Color(0xFFACACAC), fontSize: 15),
+            // 各画面ごとにText変更
+            // title: const Row(
+            //   mainAxisAlignment: MainAxisAlignment.start,
+            //   children: [
+            //     Text(
+            //       'ホーム',
+            //     )
+            //   ],
+            // ),
+            // titleTextStyle:
+            //     const TextStyle(color: Color(0xFFACACAC), fontSize: 15),
             bottom: const PreferredSize(
               preferredSize: Size.fromHeight(1),
               child: Divider(
