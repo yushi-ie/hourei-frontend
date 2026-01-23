@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:hourei_flutter/screens/home_ui_screens/home_screen.dart';
+import 'package:hourei_flutter/screens/home_ui_screens/timeline_screen.dart';
+import 'package:hourei_flutter/screens/home_ui_screens/zyoubun_screen.dart';
+import 'package:hourei_flutter/screens/home_ui_screens/news_screen.dart';
+import 'package:hourei_flutter/screens/home_ui_screens/mypage_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -7,12 +12,52 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
+enum PageType {
+  // ページをここで管理
+  home,
+  timeline,
+  zyoubun,
+  news,
+  mypage,
+}
+
 class _HomeScreenState extends State<HomeScreen> {
+  PageType selectedPage = PageType.home;
   bool homeIsSelected = true;
   bool timelineIsSelected = false;
   bool newIsSelected = false;
   bool myPageIsSelected = false;
   bool zyoubunIsSelected = false;
+
+  Widget _buildRightContent() {
+    switch (selectedPage) {
+      case PageType.home:
+        return const HomeContent();
+      case PageType.timeline:
+        return const TimelineContent();
+      case PageType.zyoubun:
+        return const ZyoubunContent();
+      case PageType.news:
+        return const NewsContent();
+      case PageType.mypage:
+        return const MyPageContent();
+    }
+  }
+
+  String _getAppBarTitle() {
+    switch (selectedPage) {
+      case PageType.home:
+        return 'ホーム';
+      case PageType.timeline:
+        return 'タイムライン';
+      case PageType.zyoubun:
+        return '条文階層';
+      case PageType.news:
+        return 'ニュース・時事ネタ';
+      case PageType.mypage:
+        return 'マイページ';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +133,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           myPageIsSelected = false;
                           zyoubunIsSelected = false;
                         });
-                        // 議論画面に遷移する処理
+                        // ホーム画面に遷移する処理
+                        setState(() {
+                          selectedPage = PageType.home;
+                        });
                       },
                       style: ElevatedButton.styleFrom(
                           elevation: 0,
@@ -100,11 +148,11 @@ class _HomeScreenState extends State<HomeScreen> {
                               : const Color(0xFF1E2129)),
                       child: Row(children: [
                         Image.asset(
-                          'assets/giron.png',
+                          'assets/home.png',
                         ),
                         const SizedBox(width: 18),
                         const Text('ホーム',
-                            style: TextStyle(fontSize: 15, color: Colors.white))
+                            style: TextStyle(fontSize: 14, color: Colors.white))
                       ])),
                 ),
                 const SizedBox(height: 35),
@@ -121,6 +169,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           zyoubunIsSelected = false;
                         });
                         // タイムラインの画面に遷移する処理
+                        setState(() {
+                          selectedPage = PageType.timeline;
+                        });
                       },
                       style: ElevatedButton.styleFrom(
                           elevation: 0,
@@ -132,11 +183,11 @@ class _HomeScreenState extends State<HomeScreen> {
                               : const Color(0xFF1E2129)),
                       child: Row(children: [
                         Image.asset(
-                          'assets/kensaku.png',
+                          'assets/giron.png',
                         ),
                         const SizedBox(width: 18),
                         const Text('タイムライン',
-                            style: TextStyle(fontSize: 15, color: Colors.white))
+                            style: TextStyle(fontSize: 14, color: Colors.white))
                       ])),
                 ),
                 const SizedBox(height: 35),
@@ -153,6 +204,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           myPageIsSelected = false;
                         });
                         // 条文階層画面に遷移する処理
+                        setState(() {
+                          selectedPage = PageType.zyoubun;
+                        });
                       },
                       style: ElevatedButton.styleFrom(
                           elevation: 0,
@@ -164,11 +218,11 @@ class _HomeScreenState extends State<HomeScreen> {
                               : const Color(0xFF1E2129)),
                       child: Row(children: [
                         Image.asset(
-                          'assets/news.png',
+                          'assets/kensaku.png',
                         ),
                         const SizedBox(width: 18),
                         const Text('条文階層',
-                            style: TextStyle(fontSize: 15, color: Colors.white))
+                            style: TextStyle(fontSize: 14, color: Colors.white))
                       ])),
                 ),
                 const SizedBox(height: 35),
@@ -185,6 +239,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           zyoubunIsSelected = false;
                         });
                         // ニュース画面に遷移する処理
+                        setState(() {
+                          selectedPage = PageType.news;
+                        });
                       },
                       style: ElevatedButton.styleFrom(
                           elevation: 0,
@@ -200,7 +257,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(width: 18),
                         const Text('ニュース・時事ネタ',
-                            style: TextStyle(fontSize: 15, color: Colors.white))
+                            style: TextStyle(fontSize: 14, color: Colors.white))
                       ])),
                 ),
                 const SizedBox(height: 35),
@@ -217,6 +274,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           zyoubunIsSelected = false;
                         });
                         // マイページ画面に遷移する処理
+                        setState(() {
+                          selectedPage = PageType.mypage;
+                        });
                       },
                       style: ElevatedButton.styleFrom(
                           elevation: 0,
@@ -232,10 +292,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(width: 18),
                         const Text('マイページ',
-                            style: TextStyle(fontSize: 15, color: Colors.white))
+                            style: TextStyle(fontSize: 14, color: Colors.white))
                       ])),
                 ),
-                const SizedBox(height: 220),
+                const SizedBox(height: 140),
                 const Divider(
                   color: Color(0xFF2E2E2E),
                   thickness: 1,
@@ -245,12 +305,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 20),
                 const Text(
+                  // 一旦これ
                   'UserIDXXXXXXX',
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
                   ),
-                ) // 一旦これ
+                )
               ],
             ),
           ),
@@ -261,16 +322,18 @@ class _HomeScreenState extends State<HomeScreen> {
           appBar: AppBar(
             backgroundColor: const Color(0xFF1E2129),
             // 各画面ごとにText変更
-            // title: const Row(
-            //   mainAxisAlignment: MainAxisAlignment.start,
-            //   children: [
-            //     Text(
-            //       'ホーム',
-            //     )
-            //   ],
-            // ),
-            // titleTextStyle:
-            //     const TextStyle(color: Color(0xFFACACAC), fontSize: 15),
+            title: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+              Text(
+                _getAppBarTitle(),
+                style: const TextStyle(
+                  color: Color(0xFFACACAC),
+                  fontSize: 16,
+                  fontFamily: 'Inter',
+                ),
+              ),
+            ]),
+            titleTextStyle:
+                const TextStyle(color: Color(0xFFACACAC), fontSize: 15),
             bottom: const PreferredSize(
               preferredSize: Size.fromHeight(1),
               child: Divider(
@@ -280,6 +343,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
+          body: _buildRightContent(),
         ))
       ]),
     );
