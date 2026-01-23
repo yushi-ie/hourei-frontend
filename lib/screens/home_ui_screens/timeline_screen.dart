@@ -5,11 +5,20 @@ class TimelineContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
-        'タイムライン画面',
-        style: TextStyle(color: Colors.white, fontSize: 24),
-      ),
-    );
+    return const Row(children: [
+      // ゴリ押し実装なので後で型を作成する
+      SizedBox(width: 508),
+      Column(children: [
+        SizedBox(height: 27),
+        SizedBox(
+          height: 600,
+          child: VerticalDivider(
+            width: 1,
+            thickness: 1,
+            color: Color(0xFF2E2E2E),
+          ),
+        ),
+      ]),
+    ]);
   }
 }
