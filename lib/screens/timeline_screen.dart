@@ -110,15 +110,6 @@ class _TimelineScreenState extends State<TimelineScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'タイムライン',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
                           Expanded(
                             child: ListView.builder(
                               itemCount: dummyDiscussions.length,
