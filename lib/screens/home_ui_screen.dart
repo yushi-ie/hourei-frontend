@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'timeline_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,6 +14,40 @@ class _HomeScreenState extends State<HomeScreen> {
   bool newIsSelected = false;
   bool myPageIsSelected = false;
   bool zyoubunIsSelected = false;
+
+  Widget _getSelectedScreen() {
+    if (timelineIsSelected) {
+      return const TimelineScreen();
+    }
+    // デフォルトはホーム画面(空のプレースホルダー)
+    return Scaffold(
+      backgroundColor: const Color(0xFF1E1E1E),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF1E2129),
+        title: const Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Text('ホーム'),
+          ],
+        ),
+        titleTextStyle: const TextStyle(color: Color(0xFFACACAC), fontSize: 15),
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(1),
+          child: Divider(
+            height: 1,
+            thickness: 1,
+            color: Color(0xFF2E2E2E),
+          ),
+        ),
+      ),
+      body: const Center(
+        child: Text(
+          'ホーム画面(準備中)',
+          style: TextStyle(color: Colors.white, fontSize: 18),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +123,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           myPageIsSelected = false;
                           zyoubunIsSelected = false;
                         });
-                        // 議論画面に遷移する処理
                       },
                       style: ElevatedButton.styleFrom(
                           elevation: 0,
@@ -120,12 +154,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           myPageIsSelected = false;
                           zyoubunIsSelected = false;
                         });
-                        // タイムラインの画面に遷移する処理
                       },
                       style: ElevatedButton.styleFrom(
                           elevation: 0,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4), // ← ここを調整
+                            borderRadius: BorderRadius.circular(4),
                           ),
                           backgroundColor: timelineIsSelected
                               ? const Color(0xFF3E3E3E)
@@ -152,7 +185,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           homeIsSelected = false;
                           myPageIsSelected = false;
                         });
-                        // 条文階層画面に遷移する処理
                       },
                       style: ElevatedButton.styleFrom(
                           elevation: 0,
@@ -184,7 +216,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           myPageIsSelected = false;
                           zyoubunIsSelected = false;
                         });
-                        // ニュース画面に遷移する処理
                       },
                       style: ElevatedButton.styleFrom(
                           elevation: 0,
@@ -216,7 +247,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           homeIsSelected = false;
                           zyoubunIsSelected = false;
                         });
-                        // マイページ画面に遷移する処理
                       },
                       style: ElevatedButton.styleFrom(
                           elevation: 0,
@@ -250,37 +280,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
                   ),
-                ) // 一旦これ
+                )
               ],
             ),
           ),
         ),
         Expanded(
-            child: Scaffold(
-          backgroundColor: const Color(0xFF1E1E1E),
-          appBar: AppBar(
-            backgroundColor: const Color(0xFF1E2129),
-            // 各画面ごとにText変更
-            // title: const Row(
-            //   mainAxisAlignment: MainAxisAlignment.start,
-            //   children: [
-            //     Text(
-            //       'ホーム',
-            //     )
-            //   ],
-            // ),
-            // titleTextStyle:
-            //     const TextStyle(color: Color(0xFFACACAC), fontSize: 15),
-            bottom: const PreferredSize(
-              preferredSize: Size.fromHeight(1),
-              child: Divider(
-                height: 1,
-                thickness: 1,
-                color: Color(0xFF2E2E2E),
-              ),
-            ),
-          ),
-        ))
+          child: _getSelectedScreen(),
+        )
       ]),
     );
   }

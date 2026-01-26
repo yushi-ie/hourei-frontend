@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../widgets/discussion_card.dart';
+import '../widgets/discussion_detail_panel.dart';
+import '../models/discussion.dart';
+import '../models/comment.dart';
 
 class TimelineScreen extends StatefulWidget {
   const TimelineScreen({super.key});
@@ -9,33 +12,67 @@ class TimelineScreen extends StatefulWidget {
 }
 
 class _TimelineScreenState extends State<TimelineScreen> {
-  // Dummy data for now, replacing FutureBuilder logic for UI alignment
-  final List<Map<String, String>> dummyDiscussions = [
-    {
-      'title': '道路交通法の改善について',
-      'timeAgo': '1時間前',
-      'tag': '道路交通法',
-    },
-    {
-      'title': '刑法について',
-      'timeAgo': '1時間前',
-      'tag': '刑法',
-    },
-    {
-      'title': '著作権法の改善について',
-      'timeAgo': '1時間前',
-      'tag': '著作権法',
-    },
-    {
-      'title': '公証人法について',
-      'timeAgo': '1時間前',
-      'tag': '公証人法',
-    },
-    {
-      'title': '道路交通法の改善について',
-      'timeAgo': '1時間前',
-      'tag': '道路交通法',
-    },
+  Discussion? _selectedDiscussion;
+
+  // Dummy data with comments
+  final List<Discussion> dummyDiscussions = [
+    Discussion(
+      id: 1,
+      title: '道路交通法の改善について',
+      lawTitle: '道路交通法',
+      date: '1時間前',
+      comments: [
+        Comment(
+          id: 1,
+          userId: 'UserIDxxxxxx',
+          content: '道路交通法改善した方が良いと思います。',
+          createdAt: DateTime.now().subtract(const Duration(hours: 1)),
+          discussionId: 1,
+        ),
+        Comment(
+          id: 2,
+          userId: 'UserIDxxxxxx',
+          content: '道路交通法改善した方が良いと思いません。',
+          createdAt: DateTime.now().subtract(const Duration(hours: 1, minutes: 3)),
+          discussionId: 1,
+        ),
+        Comment(
+          id: 3,
+          userId: 'UserIDxxxxxx',
+          content: '道路交通法改善した方が良いと思いません。',
+          createdAt: DateTime.now().subtract(const Duration(hours: 1, minutes: 6)),
+          discussionId: 1,
+        ),
+      ],
+    ),
+    Discussion(
+      id: 2,
+      title: '刑法について',
+      lawTitle: '刑法',
+      date: '1時間前',
+      comments: [],
+    ),
+    Discussion(
+      id: 3,
+      title: '著作権法の改善について',
+      lawTitle: '著作権法',
+      date: '1時間前',
+      comments: [],
+    ),
+    Discussion(
+      id: 4,
+      title: '公証人法について',
+      lawTitle: '公証人法',
+      date: '1時間前',
+      comments: [],
+    ),
+    Discussion(
+      id: 5,
+      title: '道路交通法の改善について',
+      lawTitle: '道路交通法',
+      date: '1時間前',
+      comments: [],
+    ),
   ];
 
   @override
@@ -84,13 +121,20 @@ class _TimelineScreenState extends State<TimelineScreen> {
                     child: ListView.builder(
                       itemCount: dummyDiscussions.length,
                       itemBuilder: (context, index) {
-                        final item = dummyDiscussions[index];
+                        final discussion = dummyDiscussions[index];
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 16.0),
-                          child: DiscussionCard(
-                            title: item['title']!,
-                            timeAgo: item['timeAgo']!,
-                            tag: item['tag']!,
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedDiscussion = discussion;
+                              });
+                            },
+                            child: DiscussionCard(
+                              title: discussion.title,
+                              timeAgo: discussion.date,
+                              tag: discussion.lawTitle,
+                            ),
                           ),
                         );
                       },
@@ -101,34 +145,43 @@ class _TimelineScreenState extends State<TimelineScreen> {
             ),
             const SizedBox(width: 24),
             Expanded(
-              flex: 1, // Split view ratio 1:1 for now, adjust if needed (image looks like maybe 4:6 or 1:1)
-              child: Container(
-                decoration: const BoxDecoration(
-                   border: Border(
-                     left: BorderSide(color: Color(0xFF2E2E2E), width: 1),
-                   )
-                ),
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      '議論の詳細を表示',
-                      style: TextStyle(
-                        color: Color(0xFFACACAC),
-                        fontSize: 16,
+              flex: 1,
+              child: _selectedDiscussion == null
+                  ? Container(
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          left: BorderSide(color: Color(0xFF2E2E2E), width: 1),
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      '左側のリストから気になる議論を選択してください',
-                      style: TextStyle(
-                        color: Color(0xFFACACAC),
-                        fontSize: 12,
+                      child: const Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            '議論の詳細を表示',
+                            style: TextStyle(
+                              color: Color(0xFFACACAC),
+                              fontSize: 16,
+                            ),
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            '左側のリストから気になる議論を選択してください',
+                            style: TextStyle(
+                              color: Color(0xFFACACAC),
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                       ),
+                    )
+                  : DiscussionDetailPanel(
+                      discussion: _selectedDiscussion!,
+                      onBack: () {
+                        setState(() {
+                          _selectedDiscussion = null;
+                        });
+                      },
                     ),
-                  ],
-                ),
-              ),
             ),
           ],
         ),
