@@ -99,92 +99,94 @@ class _TimelineScreenState extends State<TimelineScreen> {
       ),
       body: Container(
         color: const Color(0xFF1E1E1E),
-        padding: const EdgeInsets.all(24.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 1,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'タイムライン',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: dummyDiscussions.length,
-                      itemBuilder: (context, index) {
-                        final discussion = dummyDiscussions[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 16.0),
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _selectedDiscussion = discussion;
-                              });
-                            },
-                            child: DiscussionCard(
-                              title: discussion.title,
-                              timeAgo: discussion.date,
-                              tag: discussion.lawTitle,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 24),
-            Expanded(
-              flex: 1,
-              child: _selectedDiscussion == null
-                  ? Container(
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          left: BorderSide(color: Color(0xFF2E2E2E), width: 1),
-                        ),
-                      ),
-                      child: const Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+        child: _selectedDiscussion == null
+            ? Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            '議論の詳細を表示',
+                          const Text(
+                            'タイムライン',
                             style: TextStyle(
-                              color: Color(0xFFACACAC),
-                              fontSize: 16,
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(height: 16),
-                          Text(
-                            '左側のリストから気になる議論を選択してください',
-                            style: TextStyle(
-                              color: Color(0xFFACACAC),
-                              fontSize: 12,
+                          const SizedBox(height: 24),
+                          Expanded(
+                            child: ListView.builder(
+                              itemCount: dummyDiscussions.length,
+                              itemBuilder: (context, index) {
+                                final discussion = dummyDiscussions[index];
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 16.0),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        _selectedDiscussion = discussion;
+                                      });
+                                    },
+                                    child: DiscussionCard(
+                                      title: discussion.title,
+                                      timeAgo: discussion.date,
+                                      tag: discussion.lawTitle,
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           ),
                         ],
                       ),
-                    )
-                  : DiscussionDetailPanel(
-                      discussion: _selectedDiscussion!,
-                      onBack: () {
-                        setState(() {
-                          _selectedDiscussion = null;
-                        });
-                      },
                     ),
-            ),
-          ],
-        ),
+                    const SizedBox(width: 24),
+                    Expanded(
+                      flex: 1,
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          border: Border(
+                            left: BorderSide(color: Color(0xFF2E2E2E), width: 1),
+                          ),
+                        ),
+                        child: const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '議論の詳細を表示',
+                              style: TextStyle(
+                                color: Color(0xFFACACAC),
+                                fontSize: 16,
+                              ),
+                            ),
+                            SizedBox(height: 16),
+                            Text(
+                              '左側のリストから気になる議論を選択してください',
+                              style: TextStyle(
+                                color: Color(0xFFACACAC),
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : DiscussionDetailPanel(
+                discussion: _selectedDiscussion!,
+                onBack: () {
+                  setState(() {
+                    _selectedDiscussion = null;
+                  });
+                },
+              ),
       ),
     );
   }
