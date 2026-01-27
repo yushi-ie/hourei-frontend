@@ -81,19 +81,38 @@ class _NewsScreenState extends State<NewsScreen> {
                   ),
                 ),
                 Expanded(
-                  child: GridView.builder(
+                  child: SingleChildScrollView(
                     padding: const EdgeInsets.all(16),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2, // 2列
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      childAspectRatio: 0.8, // 縦横比調整
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Left Column
+                        Expanded(
+                          child: Column(
+                            children: [
+                              for (int i = 0; i < _newsItems.length; i += 2)
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 16.0),
+                                  child: _buildNewsCard(_newsItems[i]),
+                                ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        // Right Column
+                        Expanded(
+                          child: Column(
+                            children: [
+                              for (int i = 1; i < _newsItems.length; i += 2)
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 16.0),
+                                  child: _buildNewsCard(_newsItems[i]),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    itemCount: _newsItems.length,
-                    itemBuilder: (context, index) {
-                      final item = _newsItems[index];
-                      return _buildNewsCard(item);
-                    },
                   ),
                 ),
               ],
@@ -144,90 +163,84 @@ class _NewsScreenState extends State<NewsScreen> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min, // Wrap content height
         children: [
-          // Image Placeholder (Top Half)
-          Expanded(
-            flex: 3,
+          // Image Placeholder (Fixed aspect ratio)
+          AspectRatio(
+            aspectRatio: 16 / 9,
             child: Container(
               decoration: const BoxDecoration(
                 color: Colors.grey, // Placeholder color
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(8),
-                  topRight: Radius.circular(8),
-                ),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
               ),
               width: double.infinity,
-              // image: DecorationImage(...) // TODO: Add actual images
               child: const Icon(Icons.image, color: Colors.white24, size: 48),
             ),
           ),
-          // Content (Bottom Half)
-          Expanded(
-            flex: 4,
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          item['title'],
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Text(
-                        item['timeAgo'],
+          // Content (Variable height)
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        item['title'],
                         style: const TextStyle(
-                          color: Color(0xFFACACAC),
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                        maxLines: 2, // Limit title lines
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      item['timeAgo'],
+                      style: const TextStyle(
+                        color: Color(0xFFACACAC),
+                        fontSize: 10,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  item['description'],
+                  style: const TextStyle(
+                    color: Color(0xFFACACAC),
+                    fontSize: 11,
+                  ),
+                  maxLines: 3, // Limit description lines (e.g., 3 lines max)
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: (item['tags'] as List<String>).map((tag) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2E2E2E), // Tag background
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        tag,
+                        style: const TextStyle(
+                          color: Color(0xFFACACAC), // Tag text
                           fontSize: 10,
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    item['description'],
-                    style: const TextStyle(
-                      color: Color(0xFFACACAC),
-                      fontSize: 11,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const Spacer(),
-                  Row(
-                    children: (item['tags'] as List<String>).map((tag) {
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF2E2E2E), // Tag background
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            tag,
-                            style: const TextStyle(
-                              color: Color(0xFFACACAC), // Tag text
-                              fontSize: 10,
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
+                    );
+                  }).toList(),
+                ),
+              ],
             ),
           ),
         ],
