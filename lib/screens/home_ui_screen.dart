@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'timeline_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,6 +14,40 @@ class _HomeScreenState extends State<HomeScreen> {
   bool newIsSelected = false;
   bool myPageIsSelected = false;
   bool zyoubunIsSelected = false;
+
+  Widget _getSelectedScreen() {
+    if (timelineIsSelected) {
+      return const TimelineScreen();
+    }
+    // デフォルトはホーム画面(空のプレースホルダー)
+    return Scaffold(
+      backgroundColor: const Color(0xFF1E1E1E),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF1E2129),
+        title: const Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Text('ホーム'),
+          ],
+        ),
+        titleTextStyle: const TextStyle(color: Color(0xFFACACAC), fontSize: 15),
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(1),
+          child: Divider(
+            height: 1,
+            thickness: 1,
+            color: Color(0xFF2E2E2E),
+          ),
+        ),
+      ),
+      body: const Center(
+        child: Text(
+          'ホーム画面(準備中)',
+          style: TextStyle(color: Colors.white, fontSize: 18),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +123,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           myPageIsSelected = false;
                           zyoubunIsSelected = false;
                         });
-                        // 議論画面に遷移する処理
                       },
                       style: ElevatedButton.styleFrom(
                           elevation: 0,
@@ -120,12 +154,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           myPageIsSelected = false;
                           zyoubunIsSelected = false;
                         });
-                        // タイムラインの画面に遷移する処理
                       },
                       style: ElevatedButton.styleFrom(
                           elevation: 0,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4), // ← ここを調整
+                            borderRadius: BorderRadius.circular(4),
                           ),
                           backgroundColor: timelineIsSelected
                               ? const Color(0xFF3E3E3E)
@@ -152,7 +185,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           homeIsSelected = false;
                           myPageIsSelected = false;
                         });
-                        // 条文階層画面に遷移する処理
                       },
                       style: ElevatedButton.styleFrom(
                           elevation: 0,
@@ -184,7 +216,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           myPageIsSelected = false;
                           zyoubunIsSelected = false;
                         });
-                        // ニュース画面に遷移する処理
                       },
                       style: ElevatedButton.styleFrom(
                           elevation: 0,
@@ -216,7 +247,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           homeIsSelected = false;
                           zyoubunIsSelected = false;
                         });
-                        // マイページ画面に遷移する処理
                       },
                       style: ElevatedButton.styleFrom(
                           elevation: 0,
@@ -250,216 +280,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
                   ),
-                ) // 一旦これ
+                )
               ],
             ),
           ),
         ),
         Expanded(
-          child: Scaffold(
-            backgroundColor: const Color(0xFF1E1E1E),
-            appBar: AppBar(
-              backgroundColor: const Color(0xFF1E2129),
-              title: const Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text('ホーム'),
-                ],
-              ),
-              titleTextStyle: const TextStyle(color: Color(0xFFACACAC), fontSize: 15),
-              bottom: const PreferredSize(
-                preferredSize: Size.fromHeight(1),
-                child: Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: Color(0xFF2E2E2E),
-                ),
-              ),
-            ),
-            body: Container(
-              color: const Color(0xFF1E1E1E),
-              padding: const EdgeInsets.all(24.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Left Column: Latest Discussions
-                  Expanded(
-                    flex: 1,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                      const Text(
-                        '最新の議論',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        '最近盛り上がった議論を表示しています',
-                        style: TextStyle(
-                          color: Color(0xFFACACAC),
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Expanded(
-                        child: ListView(
-                          children: const [
-                            DiscussionCard(
-                              title: '道路交通法の改善について',
-                              timeAgo: '1時間前',
-                              tag: '道路交通法',
-                            ),
-                            SizedBox(height: 16),
-                            DiscussionCard(
-                              title: '道路交通法の改善について',
-                              timeAgo: '1時間前',
-                              tag: '道路交通法',
-                            ),
-                            SizedBox(height: 16),
-                            DiscussionCard(
-                              title: '道路交通法の改善について',
-                              timeAgo: '1時間前',
-                              tag: '道路交通法',
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // Right Column: AI Consultation
-                const SizedBox(width: 24),
-                Expanded(
-                  flex: 1,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'AIと相談',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'AIに気軽に相談してみましょう',
-                        style: TextStyle(
-                          color: Color(0xFFACACAC),
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF1E2129),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFF2E2E2E)),
-                          ),
-                          child: Column(
-                            children: [
-                              // Chat Messages
-                              Expanded(
-                                child: ListView(
-                                  children: [
-                                    Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Container(
-                                        padding: const EdgeInsets.all(16),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFF252830),
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: const Text(
-                                          'こんにちは。法令に関する疑問や議論したい\nポイントについて教えてください。',
-                                          style: TextStyle(
-                                            color: Colors.white, // Colors.white
-                                            height: 1.6,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Align(
-                                      alignment: Alignment.centerRight,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 16, vertical: 8),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFF5B4DFF),
-                                          borderRadius: BorderRadius.circular(4),
-                                        ),
-                                        child: const Text(
-                                          '著作権について',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              // Input Field
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFFAFAFA),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
-                                child: Row(
-                                  children: [
-                                    const Expanded(
-                                      child: TextField(
-                                        decoration: InputDecoration(
-                                          hintText: '質問や提案を入力してください...',
-                                          hintStyle: TextStyle(
-                                            color: Color(0xFFACACAC),
-                                            fontSize: 14,
-                                          ),
-                                          border: InputBorder.none,
-                                          contentPadding: EdgeInsets.symmetric(vertical: 14),
-                                        ),
-                                        style: TextStyle(color: Colors.black),
-                                      ),
-                                    ),
-                                    Container(
-                                      width: 32,
-                                      height: 32,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFF5B4DFF),
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: const Icon(
-                                        Icons.arrow_upward,
-                                        color: Colors.white,
-                                        size: 20,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+          child: _getSelectedScreen(),
+        )
       ]),
     );
   }
