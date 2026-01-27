@@ -107,13 +107,20 @@ class _LawDetailScreenState extends State<LawDetailScreen> {
       final result = await _api.searchLaws(keyword);
       // Convert search results to LawTreeItem format
       final List<dynamic> items = result['items'] ?? [];
-      final searchItems = items.map((item) {
-        return LawTreeItem(
-          id: item['law_id'] ?? item['LawId'] ?? '',
-          name: item['law_title'] ?? item['LawTitle'] ?? '',
-          type: 'law',
-        );
-      }).toList();
+      final Set<String> seenIds = {};
+      final List<LawTreeItem> searchItems = [];
+
+      for (var item in items) {
+        final String? id = item['law_id'] ?? item['LawId'];
+        if (id != null && !seenIds.contains(id)) {
+          seenIds.add(id);
+          searchItems.add(LawTreeItem(
+            id: id,
+            name: item['law_title'] ?? item['LawTitle'] ?? '',
+            type: 'law',
+          ));
+        }
+      }
 
       setState(() {
         _currentItems = searchItems;
