@@ -12,7 +12,7 @@ class NewsScreen extends StatefulWidget {
 
 class _NewsScreenState extends State<NewsScreen> {
   final ApiService _api = ApiService();
-  Map<String, dynamic>? _selectedNewsItem;
+  NewsItem? _selectedNewsItem;
   List<NewsItem> _newsItems = [];
   bool _isLoading = true;
   String? _errorMessage;
@@ -209,12 +209,7 @@ class _NewsScreenState extends State<NewsScreen> {
     return GestureDetector(
       onTap: () {
         setState(() {
-          _selectedNewsItem = {
-            'title': item.title,
-            'summary': item.summary,
-            'imageUrl': item.imageUrl,
-            'tags': item.relatedLaws,
-          };
+          _selectedNewsItem = item;
         });
       },
       child: Container(

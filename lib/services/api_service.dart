@@ -150,4 +150,28 @@ class ApiService {
       rethrow;
     }
   }
+
+  Future<List<String>> analyzeNews(String title, String summary) async {
+    final url = Uri.parse('${Config.baseUrl}/api/news/analyze');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'title': title,
+          'summary': summary,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final body = utf8.decode(response.bodyBytes);
+        final List<dynamic> data = json.decode(body);
+        return data.map((e) => e.toString()).toList();
+      } else {
+        throw Exception('Failed to analyze news: ${response.statusCode}');
+      }
+    } catch (e) {
+      print("Error analyzing news: $e");
+      return [];
+    }
+  }
 }
