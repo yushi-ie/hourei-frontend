@@ -5,6 +5,7 @@ import '../models/discussion.dart';
 import '../models/law.dart';
 import '../models/news_item.dart';
 import '../models/law_tree_item.dart';
+import '../models/chat_message.dart';
 
 class ApiService {
   Future<LawDetail> getLawDetail(String lawId) async {
@@ -123,6 +124,29 @@ class ApiService {
       }
     } catch (e) {
       print("Error creating discussion: $e");
+      rethrow;
+    }
+  }
+
+  Future<ChatMessage> sendChatMessage(List<ChatMessage> messages) async {
+    final url = Uri.parse('${Config.baseUrl}/api/ai/chat');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'messages': messages.map((m) => m.toJson()).toList(),
+        }),
+      );
+      if (response.statusCode == 200) {
+        final body = utf8.decode(response.bodyBytes);
+        final Map<String, dynamic> data = json.decode(body);
+        return ChatMessage.fromJson(data);
+      } else {
+        throw Exception('Failed to send chat message: ${response.statusCode}');
+      }
+    } catch (e) {
+      print("Error sending chat message: $e");
       rethrow;
     }
   }
