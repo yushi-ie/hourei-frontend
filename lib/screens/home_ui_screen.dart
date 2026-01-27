@@ -681,7 +681,7 @@ class _HomeContentScreenState extends State<HomeContentScreen> {
                                   ),
                                 ),
                                 child: const Text(
-                                  '送信について',
+                                  '送信',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 14,
