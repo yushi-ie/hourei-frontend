@@ -27,4 +27,14 @@ class Discussion {
           [],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'law_title': lawTitle,
+      'created_at': date,
+      'comments': comments.map((c) => c.toJson()).toList(),
+    };
+  }
 }

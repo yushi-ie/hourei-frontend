@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/law.dart';
+import '../models/law_tree_item.dart';
 import '../services/api_service.dart';
 import '../widgets/discussion_card.dart';
 
@@ -21,22 +22,90 @@ class _LawDetailScreenState extends State<LawDetailScreen> {
   final ApiService _api = ApiService();
   String? _selectedLawId;
   String? _selectedLawTitle;
+  List<LawTreeItem> _lawCategories = [];
+  bool _isLoadingTree = true;
+  String? _errorMessage;
 
-  // Dummy data for the law hierarchy list
-  final List<Map<String, String>> _lawCategories = [
-    {'title': '刑法施行法', 'lawId': '1', 'tag': '刑事'},
-    {'title': '商法', 'lawId': '2', 'tag': '憲法'},
-    {'title': '刑法', 'lawId': '3', 'tag': '憲法'},
-    {'title': '民法', 'lawId': '4', 'tag': '憲法'},
-    {'title': '商法', 'lawId': '5', 'tag': '憲法'},
-    {'title': '刑法', 'lawId': '6', 'tag': '憲法'},
-  ];
+  // Controllers for discussion form
+  final TextEditingController _discussionTitleController = TextEditingController();
+  final TextEditingController _discussionContentController = TextEditingController();
+  bool _isSubmittingDiscussion = false;
 
   @override
   void initState() {
     super.initState();
     _selectedLawId = widget.initialLawId;
     _selectedLawTitle = widget.initialLawTitle;
+    _loadLawTree();
+  }
+
+  @override
+  void dispose() {
+    _discussionTitleController.dispose();
+    _discussionContentController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadLawTree() async {
+    setState(() {
+      _isLoadingTree = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final tree = await _api.getLawTree();
+      setState(() {
+        _lawCategories = tree;
+        _isLoadingTree = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = '法令ツリーの取得に失敗しました: $e';
+        _isLoadingTree = false;
+      });
+    }
+  }
+
+  Future<void> _submitDiscussion() async {
+    if (_discussionTitleController.text.isEmpty || _selectedLawId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('議題名を入力してください')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isSubmittingDiscussion = true;
+    });
+
+    try {
+      await _api.createDiscussion(
+        title: _discussionTitleController.text,
+        lawId: _selectedLawId!,
+        lawTitle: _selectedLawTitle ?? '',
+        userId: 1, // TODO: Use actual user ID from auth
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('議論を作成しました')),
+        );
+        _discussionTitleController.clear();
+        _discussionContentController.clear();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('議論の作成に失敗しました: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmittingDiscussion = false;
+        });
+      }
+    }
   }
 
   @override
@@ -98,6 +167,37 @@ class _LawDetailScreenState extends State<LawDetailScreen> {
   }
 
   Widget _buildLawList() {
+    if (_isLoadingTree) {
+      return const Center(
+        child: CircularProgressIndicator(color: Color(0xFF3F3B96)),
+      );
+    }
+
+    if (_errorMessage != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, color: Color(0xFFACACAC), size: 48),
+            const SizedBox(height: 16),
+            Text(
+              _errorMessage!,
+              style: const TextStyle(color: Color(0xFFACACAC), fontSize: 14),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadLawTree,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF3F3B96),
+              ),
+              child: const Text('再試行', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -116,14 +216,14 @@ class _LawDetailScreenState extends State<LawDetailScreen> {
                 child: GestureDetector(
                   onTap: () {
                     setState(() {
-                      _selectedLawId = category['lawId'];
-                      _selectedLawTitle = category['title'];
+                      _selectedLawId = category.id;
+                      _selectedLawTitle = category.name;
                     });
                   },
                   child: DiscussionCard(
-                    title: category['title']!,
+                    title: category.name,
                     timeAgo: '', // No time for categories
-                    tag: category['tag']!,
+                    tag: category.type,
                   ),
                 ),
               );
@@ -368,6 +468,7 @@ class _LawDetailScreenState extends State<LawDetailScreen> {
             ),
             const SizedBox(height: 24),
             TextField(
+              controller: _discussionTitleController,
               decoration: InputDecoration(
                 hintText: '議題名（例：この法律わかりにくい？）',
                 hintStyle: const TextStyle(color: Color(0xFFACACAC)),
@@ -383,6 +484,7 @@ class _LawDetailScreenState extends State<LawDetailScreen> {
             ),
             const SizedBox(height: 16),
             TextField(
+              controller: _discussionContentController,
               maxLines: 8,
               decoration: InputDecoration(
                 hintText: '書き込み内容',
@@ -402,16 +504,23 @@ class _LawDetailScreenState extends State<LawDetailScreen> {
               width: double.infinity,
               height: 44,
               child: ElevatedButton(
-                onPressed: () {
-                  // TODO: Implement submitting discussion
-                },
+                onPressed: _isSubmittingDiscussion ? null : _submitDiscussion,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF3F3B96),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
-                child: const Text('書き込む', style: TextStyle(color: Colors.white)),
+                child: _isSubmittingDiscussion
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text('書き込む', style: TextStyle(color: Colors.white)),
               ),
             ),
           ],

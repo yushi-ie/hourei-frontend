@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import '../config.dart';
 import '../models/discussion.dart';
 import '../models/law.dart';
+import '../models/news_item.dart';
+import '../models/law_tree_item.dart';
 
 class ApiService {
   Future<LawDetail> getLawDetail(String lawId) async {
@@ -55,6 +57,73 @@ class ApiService {
     } catch (e) {
       print("Error searching: $e");
       return {};
+    }
+  }
+
+  Future<List<NewsItem>> getNews() async {
+    final url = Uri.parse('${Config.baseUrl}/api/news');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final body = utf8.decode(response.bodyBytes);
+        final List<dynamic> data = json.decode(body);
+        return data.map((e) => NewsItem.fromJson(e)).toList();
+      } else {
+        throw Exception('Failed to load news: ${response.statusCode}');
+      }
+    } catch (e) {
+      print("Error fetching news: $e");
+      rethrow;
+    }
+  }
+
+  Future<List<LawTreeItem>> getLawTree({String? category}) async {
+    final url = category != null
+        ? Uri.parse('${Config.baseUrl}/laws/tree?category=$category')
+        : Uri.parse('${Config.baseUrl}/laws/tree');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final body = utf8.decode(response.bodyBytes);
+        final List<dynamic> data = json.decode(body);
+        return data.map((e) => LawTreeItem.fromJson(e)).toList();
+      } else {
+        throw Exception('Failed to load law tree: ${response.statusCode}');
+      }
+    } catch (e) {
+      print("Error fetching law tree: $e");
+      rethrow;
+    }
+  }
+
+  Future<Discussion> createDiscussion({
+    required String title,
+    required String lawId,
+    required String lawTitle,
+    required int userId,
+  }) async {
+    final url = Uri.parse('${Config.baseUrl}/api/discussions');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'title': title,
+          'law_id': lawId,
+          'law_title': lawTitle,
+          'user_id': userId,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final body = utf8.decode(response.bodyBytes);
+        final Map<String, dynamic> data = json.decode(body);
+        return Discussion.fromJson(data);
+      } else {
+        throw Exception('Failed to create discussion: ${response.statusCode}');
+      }
+    } catch (e) {
+      print("Error creating discussion: $e");
+      rethrow;
     }
   }
 }
