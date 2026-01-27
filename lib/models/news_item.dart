@@ -8,6 +8,15 @@ class NewsItem {
   final List<String> relatedLaws;
   final List<Discussion> relatedDiscussions;
 
+  /// Returns the image URL proxied through weserv.nl to bypass CORS restrictions.
+  /// This is necessary for Flutter Web (CanvasKit) which triggers CORS preflight checks.
+  String? get proxyImageUrl {
+    if (imageUrl == null || imageUrl!.isEmpty) return null;
+    // Encode the URL for use as a query parameter
+    final encodedUrl = Uri.encodeComponent(imageUrl!);
+    return 'https://images.weserv.nl/?url=$encodedUrl&w=600&h=400&fit=cover&output=webp';
+  }
+
   NewsItem({
     required this.id,
     required this.title,

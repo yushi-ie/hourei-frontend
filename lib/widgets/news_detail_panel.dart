@@ -129,10 +129,19 @@ class _NewsDetailPanelState extends State<NewsDetailPanel> {
                           color: Colors.grey,
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: widget.newsItem.imageUrl != null
+                        child: widget.newsItem.proxyImageUrl != null
                             ? Image.network(
-                                widget.newsItem.imageUrl!,
+                                widget.newsItem.proxyImageUrl!,
                                 fit: BoxFit.cover,
+                                loadingBuilder: (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return const Center(
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Color(0xFF3F3B96),
+                                    ),
+                                  );
+                                },
                                 errorBuilder: (context, error, stackTrace) {
                                   return const Center(
                                     child: Icon(Icons.image_not_supported,

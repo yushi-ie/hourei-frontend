@@ -236,10 +236,19 @@ class _NewsScreenState extends State<NewsScreen> {
                   borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
                 ),
                 width: double.infinity,
-                child: item.imageUrl != null
+                child: item.proxyImageUrl != null
                     ? Image.network(
-                        item.imageUrl!,
+                        item.proxyImageUrl!,
                         fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return const Center(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Color(0xFF3F3B96),
+                            ),
+                          );
+                        },
                         errorBuilder: (context, error, stackTrace) {
                           return const Icon(Icons.image, color: Colors.white24, size: 48);
                         },
