@@ -22,14 +22,18 @@ class _LawDetailScreenState extends State<LawDetailScreen> {
   final ApiService _api = ApiService();
   String? _selectedLawId;
   String? _selectedLawTitle;
+  String? _selectedCategory; // Track selected category
   List<LawTreeItem> _lawCategories = [];
+  List<LawTreeItem> _currentItems = []; // Current displayed items (categories or laws)
   bool _isLoadingTree = true;
   String? _errorMessage;
 
-  // Controllers for discussion form
+  // Controllers for discussion form and search
   final TextEditingController _discussionTitleController = TextEditingController();
   final TextEditingController _discussionContentController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   bool _isSubmittingDiscussion = false;
+  bool _isSearching = false;
 
   @override
   void initState() {
@@ -43,6 +47,7 @@ class _LawDetailScreenState extends State<LawDetailScreen> {
   void dispose() {
     _discussionTitleController.dispose();
     _discussionContentController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -56,6 +61,7 @@ class _LawDetailScreenState extends State<LawDetailScreen> {
       final tree = await _api.getLawTree();
       setState(() {
         _lawCategories = tree;
+        _currentItems = tree; // Initially show categories
         _isLoadingTree = false;
       });
     } catch (e) {
@@ -64,6 +70,78 @@ class _LawDetailScreenState extends State<LawDetailScreen> {
         _isLoadingTree = false;
       });
     }
+  }
+
+  Future<void> _loadLawTreeWithCategory(String category) async {
+    setState(() {
+      _isLoadingTree = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final laws = await _api.getLawTree(category: category);
+      setState(() {
+        _currentItems = laws;
+        _selectedCategory = category;
+        _isLoadingTree = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'カテゴリの法令取得に失敗しました: $e';
+        _isLoadingTree = false;
+      });
+    }
+  }
+
+  Future<void> _performSearch(String keyword) async {
+    if (keyword.trim().isEmpty) {
+      return;
+    }
+
+    setState(() {
+      _isSearching = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final result = await _api.searchLaws(keyword);
+      // Convert search results to LawTreeItem format
+      final List<dynamic> items = result['items'] ?? [];
+      final searchItems = items.map((item) {
+        return LawTreeItem(
+          id: item['law_id'] ?? item['LawId'] ?? '',
+          name: item['law_title'] ?? item['LawTitle'] ?? '',
+          type: 'law',
+        );
+      }).toList();
+
+      setState(() {
+        _currentItems = searchItems;
+        _selectedCategory = null; // Clear category when searching
+        _isSearching = false;
+      });
+
+      if (searchItems.isEmpty) {
+        setState(() {
+          _errorMessage = '検索結果が見つかりませんでした';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = '検索に失敗しました: $e';
+        _isSearching = false;
+      });
+    }
+  }
+
+  void _navigateBack() {
+    setState(() {
+      if (_selectedCategory != null) {
+        // If we're in a category, go back to categories
+        _currentItems = _lawCategories;
+        _selectedCategory = null;
+      }
+    });
   }
 
   Future<void> _submitDiscussion() async {
@@ -167,7 +245,7 @@ class _LawDetailScreenState extends State<LawDetailScreen> {
   }
 
   Widget _buildLawList() {
-    if (_isLoadingTree) {
+    if (_isLoadingTree || _isSearching) {
       return const Center(
         child: CircularProgressIndicator(color: Color(0xFF3F3B96)),
       );
@@ -201,34 +279,58 @@ class _LawDetailScreenState extends State<LawDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          '条文階層',
-          style: TextStyle(color: Color(0xFFACACAC), fontSize: 16),
+        Row(
+          children: [
+            if (_selectedCategory != null) ...[
+              IconButton(
+                onPressed: _navigateBack,
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+              ),
+              const SizedBox(width: 8),
+            ],
+            Text(
+              _selectedCategory != null ? '$_selectedCategory の法令' : '条文階層',
+              style: const TextStyle(color: Color(0xFFACACAC), fontSize: 16),
+            ),
+          ],
         ),
         const SizedBox(height: 24),
         Expanded(
-          child: ListView.builder(
-            itemCount: _lawCategories.length,
-            itemBuilder: (context, index) {
-              final category = _lawCategories[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedLawId = category.id;
-                      _selectedLawTitle = category.name;
-                    });
-                  },
-                  child: DiscussionCard(
-                    title: category.name,
-                    timeAgo: '', // No time for categories
-                    tag: category.type,
+          child: _currentItems.isEmpty
+              ? const Center(
+                  child: Text(
+                    '結果が見つかりませんでした',
+                    style: TextStyle(color: Color(0xFFACACAC), fontSize: 14),
                   ),
+                )
+              : ListView.builder(
+                  itemCount: _currentItems.length,
+                  itemBuilder: (context, index) {
+                    final item = _currentItems[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: GestureDetector(
+                        onTap: () {
+                          if (item.isCategory) {
+                            // Load laws in this category
+                            _loadLawTreeWithCategory(item.name);
+                          } else {
+                            // Select this law to view details
+                            setState(() {
+                              _selectedLawId = item.id;
+                              _selectedLawTitle = item.name;
+                            });
+                          }
+                        },
+                        child: DiscussionCard(
+                          title: item.name,
+                          timeAgo: '', // No time for categories/laws
+                          tag: item.type == 'category' ? 'カテゴリ' : '法令',
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-          ),
         ),
       ],
     );
@@ -402,6 +504,10 @@ class _LawDetailScreenState extends State<LawDetailScreen> {
               ),
               const SizedBox(height: 16),
               TextField(
+                controller: _searchController,
+                onSubmitted: (value) {
+                  _performSearch(value);
+                },
                 decoration: InputDecoration(
                   hintText: 'キーワードを入力（例：道路交通法）',
                   hintStyle: const TextStyle(color: Color(0xFFACACAC)),
@@ -411,14 +517,19 @@ class _LawDetailScreenState extends State<LawDetailScreen> {
                     borderRadius: BorderRadius.circular(4),
                     borderSide: BorderSide.none,
                   ),
-                  suffixIcon: Container(
-                    padding: const EdgeInsets.all(8),
+                  suffixIcon: GestureDetector(
+                    onTap: () {
+                      _performSearch(_searchController.text);
+                    },
                     child: Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF3F3B96), // Purple color from image
-                        borderRadius: BorderRadius.circular(4),
+                      padding: const EdgeInsets.all(8),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF3F3B96), // Purple color from image
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Icon(Icons.search, color: Colors.white),
                       ),
-                      child: const Icon(Icons.search, color: Colors.white),
                     ),
                   ),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

@@ -27,21 +27,28 @@ class DiscussionCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
               ),
-              Text(
-                timeAgo,
-                style: const TextStyle(
-                  color: Color(0xFFACACAC),
-                  fontSize: 14,
+              if (timeAgo.isNotEmpty) ...[
+                const SizedBox(width: 16),
+                Text(
+                  timeAgo,
+                  style: const TextStyle(
+                    color: Color(0xFFACACAC),
+                    fontSize: 14,
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
           const SizedBox(height: 24),
