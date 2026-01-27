@@ -7,11 +7,13 @@ import '../widgets/discussion_card.dart';
 class LawDetailScreen extends StatefulWidget {
   final String? initialLawId;
   final String? initialLawTitle;
+  final String? initialSearchKeyword;
 
   const LawDetailScreen({
     super.key,
     this.initialLawId,
     this.initialLawTitle,
+    this.initialSearchKeyword,
   });
 
   @override
@@ -40,7 +42,43 @@ class _LawDetailScreenState extends State<LawDetailScreen> {
     super.initState();
     _selectedLawId = widget.initialLawId;
     _selectedLawTitle = widget.initialLawTitle;
+    if (widget.initialSearchKeyword != null &&
+        widget.initialSearchKeyword!.trim().isNotEmpty) {
+      _startSearch(widget.initialSearchKeyword!.trim());
+    }
     _loadLawTree();
+  }
+
+  @override
+  void didUpdateWidget(covariant LawDetailScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    final newKeyword = widget.initialSearchKeyword?.trim();
+    final oldKeyword = oldWidget.initialSearchKeyword?.trim();
+    if (newKeyword != null && newKeyword.isNotEmpty && newKeyword != oldKeyword) {
+      _startSearch(newKeyword);
+      return;
+    }
+
+    if (widget.initialLawId != null && widget.initialLawId != oldWidget.initialLawId) {
+      setState(() {
+        _selectedLawId = widget.initialLawId;
+        _selectedLawTitle = widget.initialLawTitle;
+      });
+    }
+  }
+
+  void _startSearch(String keyword) {
+    setState(() {
+      _selectedLawId = null;
+      _selectedLawTitle = null;
+      _searchController.text = keyword;
+    });
+
+    // Defer actual search to ensure UI has updated controllers.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _performSearch(keyword);
+    });
   }
 
   @override
@@ -61,7 +99,10 @@ class _LawDetailScreenState extends State<LawDetailScreen> {
       final tree = await _api.getLawTree();
       setState(() {
         _lawCategories = tree;
-        _currentItems = tree; // Initially show categories
+        // 初期検索キーワードがある場合は検索結果を優先表示する
+        if (_searchController.text.trim().isEmpty) {
+          _currentItems = tree;
+        }
         _isLoadingTree = false;
       });
     } catch (e) {

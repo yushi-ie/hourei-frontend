@@ -23,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // State for navigating to a specific law from news
   String? _targetLawId;
   String? _targetLawTitle;
+  String? _targetSearchKeyword;
 
   Widget _getSelectedScreen() {
     if (timelineIsSelected) {
@@ -34,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
           setState(() {
             _targetLawId = lawId;
             _targetLawTitle = lawTitle;
+            _targetSearchKeyword = lawTitle;
             newIsSelected = false;
             zyoubunIsSelected = true;
           });
@@ -41,11 +43,15 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
     if (zyoubunIsSelected) {
-      // Use a Key to ensure LawDetailScreen is recreated when navigating to a specific law
+      // Use a Key to ensure LawDetailScreen is recreated when navigating to a specific law or keyword
+      final lawScreenKey = (_targetLawId != null || _targetSearchKeyword != null)
+          ? ValueKey('${_targetLawId ?? ''}_${_targetSearchKeyword ?? ''}')
+          : null;
       return LawDetailScreen(
-        key: _targetLawId != null ? ValueKey(_targetLawId) : null,
+        key: lawScreenKey,
         initialLawId: _targetLawId,
         initialLawTitle: _targetLawTitle,
+        initialSearchKeyword: _targetSearchKeyword,
       );
     }
     // ホーム画面
@@ -125,6 +131,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           newIsSelected = false;
                           myPageIsSelected = false;
                           zyoubunIsSelected = false;
+                          _targetLawId = null;
+                          _targetLawTitle = null;
+                          _targetSearchKeyword = null;
                         });
                       },
                       style: ElevatedButton.styleFrom(
@@ -156,6 +165,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           newIsSelected = false;
                           myPageIsSelected = false;
                           zyoubunIsSelected = false;
+                          _targetLawId = null;
+                          _targetLawTitle = null;
+                          _targetSearchKeyword = null;
                         });
                       },
                       style: ElevatedButton.styleFrom(
@@ -187,6 +199,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           timelineIsSelected = false;
                           homeIsSelected = false;
                           myPageIsSelected = false;
+                          _targetLawId = null;
+                          _targetLawTitle = null;
+                          _targetSearchKeyword = null;
                         });
                       },
                       style: ElevatedButton.styleFrom(
@@ -218,6 +233,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           homeIsSelected = false;
                           myPageIsSelected = false;
                           zyoubunIsSelected = false;
+                          _targetLawId = null;
+                          _targetLawTitle = null;
+                          _targetSearchKeyword = null;
                         });
                       },
                       style: ElevatedButton.styleFrom(
@@ -249,6 +267,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           timelineIsSelected = false;
                           homeIsSelected = false;
                           zyoubunIsSelected = false;
+                          _targetLawId = null;
+                          _targetLawTitle = null;
+                          _targetSearchKeyword = null;
                         });
                       },
                       style: ElevatedButton.styleFrom(
