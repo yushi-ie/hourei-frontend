@@ -366,10 +366,29 @@ class _LawDetailScreenState extends State<LawDetailScreen> {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               } else if (snapshot.hasError) {
-                // For demo purposes, if API fails (likely 404 for dummy IDs), show dummy detail
-                return _buildDummyDetail(lawTitle);
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline,
+                          color: Color(0xFFACACAC), size: 48),
+                      const SizedBox(height: 16),
+                      Text(
+                        '法令詳細の取得に失敗しました: ${snapshot.error}',
+                        style: const TextStyle(
+                            color: Color(0xFFACACAC), fontSize: 14),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                );
               } else if (!snapshot.hasData) {
-                 return _buildDummyDetail(lawTitle);
+                return const Center(
+                  child: Text(
+                    '法令データが見つかりませんでした',
+                    style: TextStyle(color: Color(0xFFACACAC), fontSize: 14),
+                  ),
+                );
               }
 
               final detail = snapshot.data!;
@@ -379,21 +398,6 @@ class _LawDetailScreenState extends State<LawDetailScreen> {
         ),
       ],
     );
-  }
-
-  // Fallback for dummy data if API fails
-  Widget _buildDummyDetail(String title) {
-    return _buildDetailContent(LawDetail(
-      lawId: 'dummy',
-      lawTitle: title,
-      lawNum: '明治XX年法律代XX号',
-      category: '刑事',
-      promulgationDate: 'XXXX年XX月XX日',
-      articles: [
-        LawArticle(id: '1', articleNum: '第一条', articleText: '本法ニ於イテ～～～'),
-        LawArticle(id: '2', articleNum: '第二条', articleText: '～～～トス'),
-      ],
-    ));
   }
 
   Widget _buildDetailContent(LawDetail detail) {

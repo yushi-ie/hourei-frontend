@@ -20,15 +20,33 @@ class _HomeScreenState extends State<HomeScreen> {
   bool myPageIsSelected = false;
   bool zyoubunIsSelected = false;
 
+  // State for navigating to a specific law from news
+  String? _targetLawId;
+  String? _targetLawTitle;
+
   Widget _getSelectedScreen() {
     if (timelineIsSelected) {
       return const TimelineScreen();
     }
     if (newIsSelected) {
-      return const NewsScreen();
+      return NewsScreen(
+        onNavigateToLaw: (lawId, lawTitle) {
+          setState(() {
+            _targetLawId = lawId;
+            _targetLawTitle = lawTitle;
+            newIsSelected = false;
+            zyoubunIsSelected = true;
+          });
+        },
+      );
     }
     if (zyoubunIsSelected) {
-      return const LawDetailScreen();
+      // Use a Key to ensure LawDetailScreen is recreated when navigating to a specific law
+      return LawDetailScreen(
+        key: _targetLawId != null ? ValueKey(_targetLawId) : null,
+        initialLawId: _targetLawId,
+        initialLawTitle: _targetLawTitle,
+      );
     }
     // ホーム画面
     return const HomeContentScreen();

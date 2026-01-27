@@ -4,7 +4,11 @@ import '../services/api_service.dart';
 import '../models/news_item.dart';
 
 class NewsScreen extends StatefulWidget {
-  const NewsScreen({super.key});
+  /// Callback when user taps on a related law to navigate to LawDetailScreen.
+  /// Parameters: lawId, lawTitle
+  final void Function(String lawId, String lawTitle)? onNavigateToLaw;
+
+  const NewsScreen({super.key, this.onNavigateToLaw});
 
   @override
   State<NewsScreen> createState() => _NewsScreenState();
@@ -73,6 +77,7 @@ class _NewsScreenState extends State<NewsScreen> {
                   _selectedNewsItem = null;
                 });
               },
+              onNavigateToLaw: widget.onNavigateToLaw,
             )
           : _isLoading
               ? const Center(
