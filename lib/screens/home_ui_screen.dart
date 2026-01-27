@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'timeline_screen.dart';
+import 'law_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,6 +19,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _getSelectedScreen() {
     if (timelineIsSelected) {
       return const TimelineScreen();
+    }
+    if (zyoubunIsSelected) {
+      return const LawDetailScreen();
     }
     // デフォルトはホーム画面(空のプレースホルダー)
     return Scaffold(
