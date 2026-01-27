@@ -31,11 +31,11 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     if (newIsSelected) {
       return NewsScreen(
-        onNavigateToLaw: (lawId, lawTitle) {
+        onNavigateToLaw: (lawId, lawTitle, searchKeyword) {
           setState(() {
             _targetLawId = lawId;
             _targetLawTitle = lawTitle;
-            _targetSearchKeyword = lawTitle;
+            _targetSearchKeyword = searchKeyword; // Use the original label shown on the button
             newIsSelected = false;
             zyoubunIsSelected = true;
           });

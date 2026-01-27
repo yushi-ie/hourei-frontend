@@ -5,8 +5,8 @@ import '../models/news_item.dart';
 
 class NewsScreen extends StatefulWidget {
   /// Callback when user taps on a related law to navigate to LawDetailScreen.
-  /// Parameters: lawId, lawTitle
-  final void Function(String lawId, String lawTitle)? onNavigateToLaw;
+  /// Parameters: lawId, lawTitle, searchKeyword
+  final void Function(String lawId, String lawTitle, String searchKeyword)? onNavigateToLaw;
 
   const NewsScreen({super.key, this.onNavigateToLaw});
 

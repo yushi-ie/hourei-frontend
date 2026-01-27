@@ -7,8 +7,8 @@ class NewsDetailPanel extends StatefulWidget {
   final NewsItem newsItem;
   final VoidCallback onBack;
   /// Callback when user taps on a related law to navigate to LawDetailScreen.
-  /// Parameters: lawId, lawTitle
-  final void Function(String lawId, String lawTitle)? onNavigateToLaw;
+  /// Parameters: lawId, lawTitle, searchKeyword (the original label shown on the button)
+  final void Function(String lawId, String lawTitle, String searchKeyword)? onNavigateToLaw;
 
   const NewsDetailPanel({
     super.key,
@@ -304,13 +304,13 @@ class _NewsDetailPanelState extends State<NewsDetailPanel> {
                   final firstLaw = items[0];
                   final lawId = firstLaw['law_id']?.toString() ?? label;
                   final lawTitle = firstLaw['law_title']?.toString() ?? label;
-                  widget.onNavigateToLaw!(lawId, lawTitle);
+                  widget.onNavigateToLaw!(lawId, lawTitle, label);
                   return;
                 }
               }
               
               // If no results found, use the label as-is
-              widget.onNavigateToLaw!(label, label);
+              widget.onNavigateToLaw!(label, label, label);
             } catch (e) {
               // Close loading indicator if open
               if (mounted) {
@@ -318,7 +318,7 @@ class _NewsDetailPanelState extends State<NewsDetailPanel> {
               }
               print('Error searching law: $e');
               // Navigate with the label as fallback
-              widget.onNavigateToLaw!(label, label);
+              widget.onNavigateToLaw!(label, label, label);
             }
           } else {
             print('Law clicked: $label (no navigation callback set)');
