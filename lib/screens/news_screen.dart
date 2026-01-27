@@ -1,47 +1,51 @@
 import 'package:flutter/material.dart';
 import '../widgets/news_detail_panel.dart';
+import '../services/api_service.dart';
+import '../models/news_item.dart';
 
 class NewsScreen extends StatefulWidget {
-  const NewsScreen({super.key});
+  /// Callback when user taps on a related law to navigate to LawDetailScreen.
+  /// Parameters: lawId, lawTitle, searchKeyword
+  final void Function(String lawId, String lawTitle, String searchKeyword)? onNavigateToLaw;
+
+  const NewsScreen({super.key, this.onNavigateToLaw});
 
   @override
   State<NewsScreen> createState() => _NewsScreenState();
 }
 
 class _NewsScreenState extends State<NewsScreen> {
-  Map<String, dynamic>? _selectedNewsItem;
+  final ApiService _api = ApiService();
+  NewsItem? _selectedNewsItem;
+  List<NewsItem> _newsItems = [];
+  bool _isLoading = true;
+  String? _errorMessage;
 
-  // Dummy data for news items
-  final List<Map<String, dynamic>> _newsItems = [
-    {
-      'title': 'ドローン配送の規制緩和',
-      'timeAgo': '1時間前',
-      'description': 'ドローンによる市街地配送の規制が緩和される見通しです。',
-      'imageUrl': 'assets/news_placeholder_1.png', // Placeholder
-      'tags': ['道路交通法', '航空法'],
-    },
-    {
-      'title': 'ドローン配送の規制緩和',
-      'timeAgo': '1時間前',
-      'description': 'ドローンによる市街地配送の規制が緩和される見通しです。',
-      'imageUrl': 'assets/news_placeholder_2.png', // Placeholder
-      'tags': ['刑法施行法', '航空法'],
-    },
-    {
-      'title': 'ドローン配送の規制緩和',
-      'timeAgo': '1時間前',
-      'description': 'ドローンによる市街地配送の規制が緩和される見通しです。',
-      'imageUrl': 'assets/news_placeholder_3.png', // Placeholder
-      'tags': ['道路交通法', '航空法'],
-    },
-    {
-      'title': 'ドローン配送の規制緩和',
-      'timeAgo': '1時間前',
-      'description': 'ドローンによる市街地配送の規制が緩和される見通しです。',
-      'imageUrl': 'assets/news_placeholder_4.png', // Placeholder
-      'tags': ['道路交通法', '航空法'],
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadNews();
+  }
+
+  Future<void> _loadNews() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final news = await _api.getNews();
+      setState(() {
+        _newsItems = news;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'ニュースの取得に失敗しました: $e';
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,100 +77,140 @@ class _NewsScreenState extends State<NewsScreen> {
                   _selectedNewsItem = null;
                 });
               },
+              onNavigateToLaw: widget.onNavigateToLaw,
             )
-          : Row(
-              children: [
-                // Left Panel: News List
-                Expanded(
-                  flex: 1,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Text(
-                          '最新のニュースを表示しています',
-                          style: TextStyle(
+          : _isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    color: Color(0xFF3F3B96),
+                  ),
+                )
+              : _errorMessage != null
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.error_outline,
                             color: Color(0xFFACACAC),
-                            fontSize: 14,
+                            size: 48,
                           ),
-                        ),
+                          const SizedBox(height: 16),
+                          Text(
+                            _errorMessage!,
+                            style: const TextStyle(
+                              color: Color(0xFFACACAC),
+                              fontSize: 14,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: _loadNews,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF3F3B96),
+                            ),
+                            child: const Text(
+                              '再試行',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ],
                       ),
-                      Expanded(
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
+                    )
+                  : Row(
+                      children: [
+                        // Left Panel: News List
+                        Expanded(
+                          flex: 1,
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Left Column
-                              Expanded(
-                                child: Column(
-                                  children: [
-                                    for (int i = 0; i < _newsItems.length; i += 2)
-                                      Padding(
-                                        padding: const EdgeInsets.only(bottom: 16.0),
-                                        child: _buildNewsCard(_newsItems[i]),
-                                      ),
-                                  ],
+                              const Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: Text(
+                                  '最新のニュースを表示しています',
+                                  style: TextStyle(
+                                    color: Color(0xFFACACAC),
+                                    fontSize: 14,
+                                  ),
                                 ),
                               ),
-                              const SizedBox(width: 16),
-                              // Right Column
                               Expanded(
-                                child: Column(
-                                  children: [
-                                    for (int i = 1; i < _newsItems.length; i += 2)
-                                      Padding(
-                                        padding: const EdgeInsets.only(bottom: 16.0),
-                                        child: _buildNewsCard(_newsItems[i]),
+                                child: SingleChildScrollView(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // Left Column
+                                      Expanded(
+                                        child: Column(
+                                          children: [
+                                            for (int i = 0; i < _newsItems.length; i += 2)
+                                              Padding(
+                                                padding: const EdgeInsets.only(bottom: 16.0),
+                                                child: _buildNewsCard(_newsItems[i]),
+                                              ),
+                                          ],
+                                        ),
                                       ),
-                                  ],
+                                      const SizedBox(width: 16),
+                                      // Right Column
+                                      Expanded(
+                                        child: Column(
+                                          children: [
+                                            for (int i = 1; i < _newsItems.length; i += 2)
+                                              Padding(
+                                                padding: const EdgeInsets.only(bottom: 16.0),
+                                                child: _buildNewsCard(_newsItems[i]),
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                // Vertical Divider
-                const VerticalDivider(
-                  width: 1,
-                  thickness: 1,
-                  color: Color(0xFF2E2E2E),
-                ),
-                // Right Panel: Detail Placeholder
-                Expanded(
-                  flex: 1,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        'ニュースを選択して詳細を表示',
-                        style: TextStyle(
-                          color: Color(0xFFACACAC),
-                          fontSize: 16,
+                        // Vertical Divider
+                        const VerticalDivider(
+                          width: 1,
+                          thickness: 1,
+                          color: Color(0xFF2E2E2E),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        '左側のリストから気になるニュースの詳細を\n確認しましょう',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Color(0xFFACACAC),
-                          fontSize: 12,
+                        // Right Panel: Detail Placeholder
+                        Expanded(
+                          flex: 1,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                'ニュースを選択して詳細を表示',
+                                style: TextStyle(
+                                  color: Color(0xFFACACAC),
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              const Text(
+                                '左側のリストから気になるニュースの詳細を\\n確認しましょう',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Color(0xFFACACAC),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+                      ],
+                    ),
     );
   }
 
-  Widget _buildNewsCard(Map<String, dynamic> item) {
+  Widget _buildNewsCard(NewsItem item) {
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -192,7 +236,24 @@ class _NewsScreenState extends State<NewsScreen> {
                   borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
                 ),
                 width: double.infinity,
-                child: const Icon(Icons.image, color: Colors.white24, size: 48),
+                child: item.proxyImageUrl != null
+                    ? Image.network(
+                        item.proxyImageUrl!,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return const Center(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Color(0xFF3F3B96),
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(Icons.image, color: Colors.white24, size: 48);
+                        },
+                      )
+                    : const Icon(Icons.image, color: Colors.white24, size: 48),
               ),
             ),
             // Content (Variable height)
@@ -201,34 +262,19 @@ class _NewsScreenState extends State<NewsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          item['title'],
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                          maxLines: 2, // Limit title lines
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        item['timeAgo'],
-                        style: const TextStyle(
-                          color: Color(0xFFACACAC),
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    item.title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                    maxLines: 2, // Limit title lines
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    item['description'],
+                    item.summary,
                     style: const TextStyle(
                       color: Color(0xFFACACAC),
                       fontSize: 11,
@@ -240,7 +286,7 @@ class _NewsScreenState extends State<NewsScreen> {
                   Wrap(
                     spacing: 8,
                     runSpacing: 4,
-                    children: (item['tags'] as List<String>).map((tag) {
+                    children: item.relatedLaws.map((tag) {
                       return Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),

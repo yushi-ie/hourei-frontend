@@ -1,14 +1,95 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../models/news_item.dart';
+import '../services/api_service.dart';
 
-class NewsDetailPanel extends StatelessWidget {
-  final Map<String, dynamic> newsItem;
+class NewsDetailPanel extends StatefulWidget {
+  final NewsItem newsItem;
   final VoidCallback onBack;
+  /// Callback when user taps on a related law to navigate to LawDetailScreen.
+  /// Parameters: lawId, lawTitle, searchKeyword (the original label shown on the button)
+  final void Function(String lawId, String lawTitle, String searchKeyword)? onNavigateToLaw;
 
   const NewsDetailPanel({
     super.key,
     required this.newsItem,
     required this.onBack,
+    this.onNavigateToLaw,
   });
+
+  @override
+  State<NewsDetailPanel> createState() => _NewsDetailPanelState();
+}
+
+class _NewsDetailPanelState extends State<NewsDetailPanel> {
+  final ApiService _api = ApiService();
+  List<String> _relatedLaws = [];
+  bool _isLoadingLaws = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _relatedLaws = widget.newsItem.relatedLaws;
+    if (_relatedLaws.isEmpty) {
+      _analyzeLaws();
+    }
+  }
+
+  // If the news item changes (e.g. parent updates), re-analyze
+  @override
+  void didUpdateWidget(NewsDetailPanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.newsItem.id != oldWidget.newsItem.id) {
+       setState(() {
+         _relatedLaws = widget.newsItem.relatedLaws;
+       });
+       if (_relatedLaws.isEmpty) {
+         _analyzeLaws();
+       }
+    }
+  }
+
+  Future<void> _analyzeLaws() async {
+    setState(() {
+      _isLoadingLaws = true;
+    });
+    try {
+      final laws = await _api.analyzeNews(
+        widget.newsItem.title,
+        widget.newsItem.summary,
+      );
+      if (mounted) {
+        setState(() {
+          _relatedLaws = laws;
+          _isLoadingLaws = false;
+        });
+      }
+    } catch (e) {
+      print('Error analyzing laws: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingLaws = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _launchURL() async {
+    // Attempt to parse ID as URL
+    final urlStr = widget.newsItem.id.toString();
+    final Uri? url = Uri.tryParse(urlStr);
+    
+    if (url != null && await canLaunchUrl(url)) {
+      await launchUrl(url);
+    } else {
+      // Show snackbar or alert if URL is invalid
+      if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('リンクを開けませんでした')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +102,7 @@ class NewsDetailPanel extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(24.0),
             child: Container(
-             padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.all(24.0),
               decoration: BoxDecoration(
                 color: const Color(0xFF1E2129),
                 borderRadius: BorderRadius.circular(8),
@@ -35,7 +116,7 @@ class NewsDetailPanel extends StatelessWidget {
                       children: [
                         IconButton(
                           icon: const Icon(Icons.arrow_back, color: Colors.white),
-                          onPressed: onBack,
+                          onPressed: widget.onBack,
                         ),
                       ],
                     ),
@@ -48,60 +129,61 @@ class NewsDetailPanel extends StatelessWidget {
                           color: Colors.grey,
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(Icons.image,
-                            color: Colors.white24, size: 64),
+                        child: widget.newsItem.proxyImageUrl != null
+                            ? Image.network(
+                                widget.newsItem.proxyImageUrl!,
+                                fit: BoxFit.cover,
+                                loadingBuilder: (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return const Center(
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Color(0xFF3F3B96),
+                                    ),
+                                  );
+                                },
+                                errorBuilder: (context, error, stackTrace) {
+                                  return const Center(
+                                    child: Icon(Icons.image_not_supported,
+                                        color: Colors.white24, size: 64),
+                                  );
+                                },
+                              )
+                            : const Icon(Icons.image,
+                                color: Colors.white24, size: 64),
                       ),
                     ),
                     const SizedBox(height: 24),
-                    // Title and Date
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            newsItem['title'] ?? '',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                         Text(
-                          // Using a fixed format for now or parsing if needed, assumed item has a date or reusing timeAgo
-                          // For design match, using a placeholder format if date isn't in item
-                          '2026-01-01 18:00', 
-                          style: const TextStyle(
-                            color: Color(0xFFACACAC),
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
+                    // Title
+                    Text(
+                      widget.newsItem.title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 32),
                     // Description
                     Text(
-                      newsItem['description'] ?? '',
+                      widget.newsItem.summary,
                       style: const TextStyle(
                         color: Color(0xFFACACAC),
                         fontSize: 14,
                         height: 1.6,
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    // Long text repetition for visual match (as requested by user "images's UI")
-                    const Text(
-                      '物流クライシスへの対応として、ドローンによる市街地配送の規制が緩和される見通しです。\n'
-                      '〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜\n'
-                      '〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜\n'
-                      '〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜\n'
-                      '〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜',
-                      style: TextStyle(
-                        color: Color(0xFFACACAC),
-                        fontSize: 14,
-                        height: 1.6,
+                    const SizedBox(height: 24),
+                    // Read More Button
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        onPressed: _launchURL,
+                        icon: const Icon(Icons.open_in_new, size: 16),
+                        label: const Text('続きを読む (提供元記事へ)'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: const Color(0xFF5E5CE6),
+                        ),
                       ),
                     ),
                   ],
@@ -110,7 +192,7 @@ class NewsDetailPanel extends StatelessWidget {
             ),
           ),
         ),
-         // Vertical Divider
+        // Vertical Divider
         const VerticalDivider(
           width: 1,
           thickness: 1,
@@ -137,13 +219,13 @@ class NewsDetailPanel extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
                   decoration: BoxDecoration(
-                     color: const Color(0xFF16181D), // Darker background for box
+                    color: const Color(0xFF16181D),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: const Color(0xFF2E2E2E)),
                   ),
                   child: Column(
                     children: [
-                        const Text(
+                      const Text(
                         '関連法令',
                         style: TextStyle(
                           color: Colors.white,
@@ -152,10 +234,24 @@ class NewsDetailPanel extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      // Buttons
-                      _buildLawButton('交通法'),
-                      const SizedBox(height: 12),
-                      _buildLawButton('刑法施行法'),
+                      if (_isLoadingLaws)
+                        const SizedBox(
+                          height: 50,
+                          child: Center(
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF5E5CE6)),
+                          ),
+                        )
+                      else if (_relatedLaws.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text("関連法令は見つかりませんでした",
+                              style: TextStyle(color: Color(0xFF8C9CAB), fontSize: 12)),
+                        )
+                      else
+                        ..._relatedLaws.map((law) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12.0),
+                              child: _buildLawButton(law),
+                            )),
                     ],
                   ),
                 ),
@@ -180,13 +276,62 @@ class NewsDetailPanel extends StatelessWidget {
           ),
           elevation: 0,
         ),
-        onPressed: () {},
+        onPressed: () async {
+          // Search for the law by name and navigate to it
+          if (widget.onNavigateToLaw != null) {
+            try {
+              // Show loading indicator
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => const Center(
+                  child: CircularProgressIndicator(color: Color(0xFF5E5CE6)),
+                ),
+              );
+
+              // Search for the law by name
+              final result = await _api.searchLaws(label);
+              
+              // Close loading indicator
+              if (mounted) {
+                Navigator.of(context).pop();
+              }
+              
+              // Check if we found any results
+              if (result.isNotEmpty && result['items'] != null) {
+                final items = result['items'] as List;
+                if (items.isNotEmpty) {
+                  final firstLaw = items[0];
+                  final lawId = firstLaw['law_id']?.toString() ?? label;
+                  final lawTitle = firstLaw['law_title']?.toString() ?? label;
+                  widget.onNavigateToLaw!(lawId, lawTitle, label);
+                  return;
+                }
+              }
+              
+              // If no results found, use the label as-is
+              widget.onNavigateToLaw!(label, label, label);
+            } catch (e) {
+              // Close loading indicator if open
+              if (mounted) {
+                Navigator.of(context).pop();
+              }
+              print('Error searching law: $e');
+              // Navigate with the label as fallback
+              widget.onNavigateToLaw!(label, label, label);
+            }
+          } else {
+            print('Law clicked: $label (no navigation callback set)');
+          }
+        },
         child: Text(
           label,
           style: const TextStyle(
             color: Color(0xFF8C9CAB),
             fontSize: 12,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ),
     );
