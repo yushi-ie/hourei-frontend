@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import '../services/api_service.dart';
+import '../widgets/discussion_card.dart';
+import '../widgets/discussion_detail_panel.dart';
 import '../models/discussion.dart';
+import '../models/comment.dart';
 
 class TimelineScreen extends StatefulWidget {
   const TimelineScreen({super.key});
@@ -10,58 +12,172 @@ class TimelineScreen extends StatefulWidget {
 }
 
 class _TimelineScreenState extends State<TimelineScreen> {
-  final ApiService _api = ApiService();
-  late Future<List<Discussion>> _timelineFuture;
+  Discussion? _selectedDiscussion;
 
-  @override
-  void initState() {
-    super.initState();
-    _timelineFuture = _api.getTimeline();
-  }
+  // Dummy data with comments
+  final List<Discussion> dummyDiscussions = [
+    Discussion(
+      id: 1,
+      title: '道路交通法の改善について',
+      lawTitle: '道路交通法',
+      date: '1時間前',
+      comments: [
+        Comment(
+          id: 1,
+          userId: 'UserIDxxxxxx',
+          content: '道路交通法改善した方が良いと思います。',
+          createdAt: DateTime.now().subtract(const Duration(hours: 1)),
+          discussionId: 1,
+        ),
+        Comment(
+          id: 2,
+          userId: 'UserIDxxxxxx',
+          content: '道路交通法改善した方が良いと思いません。',
+          createdAt: DateTime.now().subtract(const Duration(hours: 1, minutes: 3)),
+          discussionId: 1,
+        ),
+        Comment(
+          id: 3,
+          userId: 'UserIDxxxxxx',
+          content: '道路交通法改善した方が良いと思いません。',
+          createdAt: DateTime.now().subtract(const Duration(hours: 1, minutes: 6)),
+          discussionId: 1,
+        ),
+      ],
+    ),
+    Discussion(
+      id: 2,
+      title: '刑法について',
+      lawTitle: '刑法',
+      date: '1時間前',
+      comments: [],
+    ),
+    Discussion(
+      id: 3,
+      title: '著作権法の改善について',
+      lawTitle: '著作権法',
+      date: '1時間前',
+      comments: [],
+    ),
+    Discussion(
+      id: 4,
+      title: '公証人法について',
+      lawTitle: '公証人法',
+      date: '1時間前',
+      comments: [],
+    ),
+    Discussion(
+      id: 5,
+      title: '道路交通法の改善について',
+      lawTitle: '道路交通法',
+      date: '1時間前',
+      comments: [],
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF1E1E1E),
       appBar: AppBar(
-        title: const Text('議論タイムライン'),
+        backgroundColor: const Color(0xFF1E2129),
+        title: const Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Text('タイムライン'),
+          ],
+        ),
+        titleTextStyle: const TextStyle(color: Color(0xFFACACAC), fontSize: 15),
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(1),
+          child: Divider(
+            height: 1,
+            thickness: 1,
+            color: Color(0xFF2E2E2E),
+          ),
+        ),
       ),
-      body: FutureBuilder<List<Discussion>>(
-        future: _timelineFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('エラーが発生しました: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('議論がありません'));
-          }
-
-          final discussions = snapshot.data!;
-          return ListView.builder(
-            itemCount: discussions.length,
-            itemBuilder: (context, index) {
-              final item = discussions[index];
-              return Card(
-                margin: const EdgeInsets.all(8.0),
-                child: ListTile(
-                  leading: const Icon(Icons.gavel, color: Colors.blueGrey),
-                  title: Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('${item.lawTitle}\n${item.date}'),
-                  isThreeLine: true,
+      body: Container(
+        color: const Color(0xFF1E1E1E),
+        child: _selectedDiscussion == null
+            ? Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: ListView.builder(
+                              itemCount: dummyDiscussions.length,
+                              itemBuilder: (context, index) {
+                                final discussion = dummyDiscussions[index];
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 16.0),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        _selectedDiscussion = discussion;
+                                      });
+                                    },
+                                    child: DiscussionCard(
+                                      title: discussion.title,
+                                      timeAgo: discussion.date,
+                                      tag: discussion.lawTitle,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 24),
+                    Expanded(
+                      flex: 1,
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          border: Border(
+                            left: BorderSide(color: Color(0xFF2E2E2E), width: 1),
+                          ),
+                        ),
+                        child: const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '議論の詳細を表示',
+                              style: TextStyle(
+                                color: Color(0xFFACACAC),
+                                fontSize: 16,
+                              ),
+                            ),
+                            SizedBox(height: 16),
+                            Text(
+                              '左側のリストから気になる議論を選択してください',
+                              style: TextStyle(
+                                color: Color(0xFFACACAC),
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              );
-            },
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // リフレッシュ処理
-          setState(() {
-            _timelineFuture = _api.getTimeline();
-          });
-        },
-        child: const Icon(Icons.refresh),
+              )
+            : DiscussionDetailPanel(
+                discussion: _selectedDiscussion!,
+                onBack: () {
+                  setState(() {
+                    _selectedDiscussion = null;
+                  });
+                },
+              ),
       ),
     );
   }
