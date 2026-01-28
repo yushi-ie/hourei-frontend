@@ -504,7 +504,6 @@ class _LawDetailScreenState extends State<LawDetailScreen> {
                           height: 1.6,
                         ),
                       ),
-                      // const Divider(color: Color(0xFF2E2E2E)),
                     ],
                   ),
                 );
@@ -517,7 +516,6 @@ class _LawDetailScreenState extends State<LawDetailScreen> {
 
   Widget _buildSearchPlaceholder() {
     return Column(
-      // mainAxisAlignment removed to use Spacers for custom positioning
       children: [
         const Spacer(flex: 1),
         const Text(
